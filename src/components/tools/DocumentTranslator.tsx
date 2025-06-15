@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Languages, Download, FileText } from "lucide-react";
+import { Languages, Download, FileText, Image, Video, FileAudio } from "lucide-react";
 
 export const DocumentTranslator = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -32,39 +31,131 @@ export const DocumentTranslator = () => {
     { code: "nl", name: "Dutch" },
   ];
 
+  const getFileTypeCategory = (file: File) => {
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(extension || '')) return 'image';
+    if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv'].includes(extension || '')) return 'video';
+    if (['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a'].includes(extension || '')) return 'audio';
+    return 'document';
+  };
+
+  const getFileTypeIcon = (file: File) => {
+    const category = getFileTypeCategory(file);
+    switch (category) {
+      case 'image': return <Image className="w-8 h-8" />;
+      case 'video': return <Video className="w-8 h-8" />;
+      case 'audio': return <FileAudio className="w-8 h-8" />;
+      default: return <FileText className="w-8 h-8" />;
+    }
+  };
+
   const handleFileSelect = async (file: File) => {
     setSelectedFile(file);
     setExtractedText("");
     setTranslatedText("");
     
-    // Simulate text extraction from document
+    const fileCategory = getFileTypeCategory(file);
+    
     setIsExtracting(true);
     try {
-      // In a real implementation, you would use a library like pdf-parse or mammoth for docx
-      // For now, we'll simulate with a timeout
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const mockExtractedText = `Sample extracted text from ${file.name}:
+      let mockExtractedText = "";
+      
+      switch (fileCategory) {
+        case 'image':
+          mockExtractedText = `Text extracted from image: ${file.name}
 
-This is a demonstration of document text extraction. In a real implementation, this would be the actual text content extracted from your uploaded document.
+This is a demonstration of OCR (Optical Character Recognition) text extraction from an image file. In a real implementation, this would use services like:
 
-The text would be processed using appropriate libraries:
-- PDF files: using pdf-parse or pdf2pic
-- DOCX files: using mammoth.js
-- TXT files: direct reading
-- Other formats: using appropriate parsers
+- Google Cloud Vision API
+- Amazon Textract
+- Azure Computer Vision
+- Tesseract.js for client-side OCR
 
-This extracted text can then be translated to your target language using translation services.`;
+The extracted text would include any readable text found in the image, such as:
+- Signs and labels
+- Document text in photos
+- Handwritten notes (depending on quality)
+- Menu items, receipts, business cards
+
+File: ${file.name}
+Type: Image (${file.type})
+Size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+          break;
+
+        case 'video':
+          mockExtractedText = `Transcript extracted from video: ${file.name}
+
+This is a demonstration of video transcript extraction. In a real implementation, this would use:
+
+- Speech-to-text APIs (Google Speech, AWS Transcribe, Azure Speech)
+- Video processing libraries to extract audio
+- Subtitle/caption extraction if available
+
+The extracted content would include:
+- Spoken dialogue and narration
+- On-screen text and captions
+- Audio descriptions
+- Timestamps for each segment
+
+File: ${file.name}
+Type: Video (${file.type})
+Duration: Estimated based on file size
+Size: ${(file.size / 1024 / 1024).toFixed(2)} MB
+
+Sample transcript content would appear here...`;
+          break;
+
+        case 'audio':
+          mockExtractedText = `Transcript extracted from audio: ${file.name}
+
+This is a demonstration of audio transcript extraction. In a real implementation, this would use:
+
+- Speech-to-text services (Google Cloud Speech, AWS Transcribe)
+- Audio processing libraries
+- Speaker identification and diarization
+
+The extracted content would include:
+- Spoken words and dialogue
+- Speaker identification (if multiple speakers)
+- Timestamps and confidence scores
+- Background audio descriptions
+
+File: ${file.name}
+Type: Audio (${file.type})
+Size: ${(file.size / 1024 / 1024).toFixed(2)} MB
+
+[Speaker 1]: Sample transcribed audio content would appear here...
+[Speaker 2]: With proper speaker identification and timing...`;
+          break;
+
+        default:
+          mockExtractedText = `Text extracted from document: ${file.name}
+
+This is a demonstration of document text extraction. In a real implementation, this would use:
+
+- PDF parsing libraries (pdf-parse, pdf2pic)
+- DOCX processing (mammoth.js)
+- Plain text reading
+- Other document format parsers
+
+File: ${file.name}
+Type: Document (${file.type})
+Size: ${(file.size / 1024 / 1024).toFixed(2)} MB
+
+Sample document content would appear here...`;
+      }
       
       setExtractedText(mockExtractedText);
       toast({
-        title: "Text Extracted",
-        description: "Document text has been successfully extracted.",
+        title: "Content Extracted",
+        description: `${fileCategory === 'document' ? 'Text' : fileCategory === 'image' ? 'Text from image' : 'Transcript'} has been successfully extracted.`,
       });
     } catch (error) {
       toast({
         title: "Extraction Failed",
-        description: "Failed to extract text from the document.",
+        description: `Failed to extract content from the ${fileCategory}.`,
         variant: "destructive",
       });
     } finally {
@@ -90,13 +181,14 @@ This extracted text can then be translated to your target language using transla
 
     setIsTranslating(true);
     try {
-      // Simulate translation API call
       await new Promise(resolve => setTimeout(resolve, 3000));
       
       const selectedLang = languages.find(lang => lang.code === targetLanguage);
+      const fileCategory = getFileTypeCategory(selectedFile!);
+      
       const mockTranslation = `[Translated to ${selectedLang?.name}]
 
-This is a simulated translation of your document. In a real implementation, this would be translated using:
+This is a simulated translation of your ${fileCategory} content. In a real implementation, this would be translated using:
 
 - Google Translate API
 - Microsoft Translator
@@ -104,22 +196,25 @@ This is a simulated translation of your document. In a real implementation, this
 - Amazon Translate
 - Or other translation services
 
-The translated text would maintain the original structure and formatting as much as possible while providing accurate translation in the target language.
+The translated content would maintain the original structure and context while providing accurate translation in the target language.
 
-Document: ${selectedFile?.name}
+File: ${selectedFile?.name}
+Type: ${fileCategory.charAt(0).toUpperCase() + fileCategory.slice(1)}
 Target Language: ${selectedLang?.name}
 Original Length: ${extractedText.length} characters
-Translation completed successfully.`;
+Translation completed successfully.
+
+[Translated content would appear here maintaining the original format and structure...]`;
 
       setTranslatedText(mockTranslation);
       toast({
         title: "Translation Complete",
-        description: `Document translated to ${selectedLang?.name} successfully.`,
+        description: `${fileCategory.charAt(0).toUpperCase() + fileCategory.slice(1)} content translated to ${selectedLang?.name} successfully.`,
       });
     } catch (error) {
       toast({
         title: "Translation Failed",
-        description: "Failed to translate the document. Please try again.",
+        description: "Failed to translate the content. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -142,7 +237,7 @@ Translation completed successfully.`;
     
     toast({
       title: "Download Started",
-      description: "Your translated document is being downloaded.",
+      description: "Your translated content is being downloaded.",
     });
   };
 
@@ -152,11 +247,11 @@ Translation completed successfully.`;
         <div className="flex items-center justify-center gap-2 mb-4">
           <Languages className="w-8 h-8 text-blue-600" />
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Document Translator
+            Media & Document Translator
           </h1>
         </div>
         <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Upload documents in various formats and translate them to multiple languages with AI-powered translation services.
+          Upload documents, images, videos, or audio files and translate their content to multiple languages with AI-powered services.
         </p>
       </div>
 
@@ -165,11 +260,11 @@ Translation completed successfully.`;
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Document Upload & Extraction
+              {selectedFile ? getFileTypeIcon(selectedFile) : <FileText className="w-5 h-5" />}
+              File Upload & Content Extraction
             </CardTitle>
             <CardDescription>
-              Upload your document and extract text content for translation
+              Upload your file and extract text content or transcripts for translation
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -177,25 +272,27 @@ Translation completed successfully.`;
               onFileSelect={handleFileSelect}
               onFileRemove={handleFileRemove}
               selectedFile={selectedFile}
-              acceptedTypes={['.pdf', '.docx', '.doc', '.txt']}
-              placeholder="Upload document for translation"
+              acceptedTypes={['.pdf', '.docx', '.doc', '.txt', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.mp3', '.wav', '.aac', '.flac', '.ogg', '.m4a']}
+              placeholder="Upload document, image, video, or audio file"
               icon={<FileText className="w-8 h-8" />}
             />
             
             {isExtracting && (
               <div className="text-center py-4">
                 <div className="animate-spin inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full"></div>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Extracting text from document...</p>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                  Extracting content from {selectedFile ? getFileTypeCategory(selectedFile) : 'file'}...
+                </p>
               </div>
             )}
 
             {extractedText && (
               <div className="space-y-2">
-                <label className="text-sm font-medium">Extracted Text:</label>
+                <label className="text-sm font-medium">Extracted Content:</label>
                 <Textarea
                   value={extractedText}
                   onChange={(e) => setExtractedText(e.target.value)}
-                  placeholder="Extracted text will appear here..."
+                  placeholder="Extracted content will appear here..."
                   className="min-h-[200px] resize-none"
                 />
               </div>
@@ -211,7 +308,7 @@ Translation completed successfully.`;
               Translation Settings
             </CardTitle>
             <CardDescription>
-              Select target language and translate your document
+              Select target language and translate your content
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -244,7 +341,7 @@ Translation completed successfully.`;
               ) : (
                 <>
                   <Languages className="w-4 h-4 mr-2" />
-                  Translate Document
+                  Translate Content
                 </>
               )}
             </Button>
@@ -252,7 +349,7 @@ Translation completed successfully.`;
             {translatedText && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Translated Text:</label>
+                  <label className="text-sm font-medium">Translated Content:</label>
                   <Button
                     variant="outline"
                     size="sm"
@@ -279,29 +376,49 @@ Translation completed successfully.`;
           <CardTitle>Supported Features</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
-              <h4 className="font-semibold text-green-600">Supported Formats</h4>
+              <h4 className="font-semibold text-green-600 flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Documents
+              </h4>
               <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
                 <li>• PDF documents</li>
-                <li>• Word documents (.docx, .doc)</li>
+                <li>• Word files (.docx, .doc)</li>
                 <li>• Plain text files (.txt)</li>
               </ul>
             </div>
             <div className="space-y-2">
-              <h4 className="font-semibold text-blue-600">Translation Quality</h4>
+              <h4 className="font-semibold text-blue-600 flex items-center gap-2">
+                <Image className="w-4 h-4" />
+                Images
+              </h4>
               <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                <li>• AI-powered translation</li>
-                <li>• Context-aware processing</li>
-                <li>• Maintains document structure</li>
+                <li>• JPEG, PNG, GIF</li>
+                <li>• BMP, WebP formats</li>
+                <li>• OCR text extraction</li>
               </ul>
             </div>
             <div className="space-y-2">
-              <h4 className="font-semibold text-purple-600">Output Options</h4>
+              <h4 className="font-semibold text-purple-600 flex items-center gap-2">
+                <Video className="w-4 h-4" />
+                Videos
+              </h4>
               <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                <li>• Editable translation text</li>
-                <li>• Download as text file</li>
-                <li>• Copy to clipboard</li>
+                <li>• MP4, AVI, MOV</li>
+                <li>• WebM, MKV formats</li>
+                <li>• Speech-to-text transcription</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold text-orange-600 flex items-center gap-2">
+                <FileAudio className="w-4 h-4" />
+                Audio
+              </h4>
+              <ul className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                <li>• MP3, WAV, AAC</li>
+                <li>• FLAC, OGG formats</li>
+                <li>• Audio transcription</li>
               </ul>
             </div>
           </div>
