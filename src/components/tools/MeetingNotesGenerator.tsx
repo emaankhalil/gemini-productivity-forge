@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,15 +6,28 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { FileUpload } from "@/components/ui/file-upload";
+import { Mic } from "lucide-react";
 
 export const MeetingNotesGenerator = () => {
   const [transcript, setTranscript] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>(null);
   const { toast } = useToast();
 
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
+    // Clear transcript when file is selected
+    setTranscript("");
+  };
+
+  const handleFileRemove = () => {
+    setSelectedFile(null);
+  };
+
   const handleAnalyze = async () => {
-    if (!transcript.trim()) {
+    if (!transcript.trim() && !selectedFile) {
       toast({
         title: "Input Required",
         description: "Please provide a meeting transcript or upload an audio file.",
@@ -71,14 +83,17 @@ export const MeetingNotesGenerator = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <Label htmlFor="audio-upload" className="text-sm font-medium">
+              <Label className="text-sm font-medium mb-2 block">
                 Audio Upload (MP3, WAV, M4A)
               </Label>
-              <div className="mt-2 border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
-                <div className="text-3xl mb-2">🎵</div>
-                <p className="text-slate-600 mb-2">Drag and drop your audio file here</p>
-                <Button variant="outline" size="sm">Choose File</Button>
-              </div>
+              <FileUpload
+                onFileSelect={handleFileSelect}
+                onFileRemove={handleFileRemove}
+                selectedFile={selectedFile}
+                acceptedTypes={['.mp3', '.wav', '.m4a', '.mp4']}
+                placeholder="Drag and drop your audio file here"
+                icon={<Mic className="w-8 h-8" />}
+              />
             </div>
 
             <div className="text-center text-slate-500">
@@ -95,7 +110,13 @@ export const MeetingNotesGenerator = () => {
                 value={transcript}
                 onChange={(e) => setTranscript(e.target.value)}
                 className="mt-2 min-h-[200px] resize-none"
+                disabled={!!selectedFile}
               />
+              {selectedFile && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Audio file selected. Remove file to use text input.
+                </p>
+              )}
             </div>
 
             <Button 

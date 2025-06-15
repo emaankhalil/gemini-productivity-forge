@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,15 +7,28 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { FileUpload } from "@/components/ui/file-upload";
+import { FileText } from "lucide-react";
 
 export const ContractAnalyzer = () => {
   const [contractText, setContractText] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>(null);
   const { toast } = useToast();
 
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
+    // Clear contract text when file is selected
+    setContractText("");
+  };
+
+  const handleFileRemove = () => {
+    setSelectedFile(null);
+  };
+
   const handleAnalyze = async () => {
-    if (!contractText.trim()) {
+    if (!contractText.trim() && !selectedFile) {
       toast({
         title: "Input Required",
         description: "Please provide contract text or upload a document to analyze.",
@@ -106,14 +118,17 @@ export const ContractAnalyzer = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <Label htmlFor="document-upload" className="text-sm font-medium">
-                Document Upload (PDF, DOCX)
+              <Label className="text-sm font-medium mb-2 block">
+                Document Upload (PDF, DOCX, DOC)
               </Label>
-              <div className="mt-2 border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
-                <div className="text-3xl mb-2">📄</div>
-                <p className="text-slate-600 mb-2">Drag and drop your contract here</p>
-                <Button variant="outline" size="sm">Choose File</Button>
-              </div>
+              <FileUpload
+                onFileSelect={handleFileSelect}
+                onFileRemove={handleFileRemove}
+                selectedFile={selectedFile}
+                acceptedTypes={['.pdf', '.docx', '.doc', '.txt']}
+                placeholder="Drag and drop your contract here"
+                icon={<FileText className="w-8 h-8" />}
+              />
             </div>
 
             <div className="text-center text-slate-500">
@@ -130,7 +145,13 @@ export const ContractAnalyzer = () => {
                 value={contractText}
                 onChange={(e) => setContractText(e.target.value)}
                 className="mt-2 min-h-[300px] resize-none font-mono text-sm"
+                disabled={!!selectedFile}
               />
+              {selectedFile && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Document file selected. Remove file to use text input.
+                </p>
+              )}
             </div>
 
             <Button 
