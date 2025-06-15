@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,30 +8,47 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/ui/file-upload";
-import { Mic } from "lucide-react";
+import { AudioRecorder } from "@/components/ui/audio-recorder";
+import { Mic, Upload } from "lucide-react";
 
 export const MeetingNotesGenerator = () => {
   const [transcript, setTranscript] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
+  const [inputMode, setInputMode] = useState<'text' | 'file' | 'record'>('text');
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>(null);
   const { toast } = useToast();
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
-    // Clear transcript when file is selected
+    setInputMode('file');
     setTranscript("");
+    setRecordedAudio(null);
   };
 
   const handleFileRemove = () => {
     setSelectedFile(null);
+    setInputMode('text');
+  };
+
+  const handleRecordingComplete = (audioBlob: Blob) => {
+    setRecordedAudio(audioBlob);
+    setInputMode('record');
+    setTranscript("");
+    setSelectedFile(null);
+  };
+
+  const handleRecordingClear = () => {
+    setRecordedAudio(null);
+    setInputMode('text');
   };
 
   const handleAnalyze = async () => {
-    if (!transcript.trim() && !selectedFile) {
+    if (!transcript.trim() && !selectedFile && !recordedAudio) {
       toast({
         title: "Input Required",
-        description: "Please provide a meeting transcript or upload an audio file.",
+        description: "Please provide a meeting transcript, upload an audio file, or record audio.",
         variant: "destructive",
       });
       return;
@@ -78,46 +96,82 @@ export const MeetingNotesGenerator = () => {
               📝 Input Meeting Content
             </CardTitle>
             <CardDescription>
-              Upload audio files or paste your meeting transcript below
+              Record live audio, upload audio files, or paste your meeting transcript
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div>
-              <Label className="text-sm font-medium mb-2 block">
-                Audio Upload (MP3, WAV, M4A)
-              </Label>
-              <FileUpload
-                onFileSelect={handleFileSelect}
-                onFileRemove={handleFileRemove}
-                selectedFile={selectedFile}
-                acceptedTypes={['.mp3', '.wav', '.m4a', '.mp4']}
-                placeholder="Drag and drop your audio file here"
-                icon={<Mic className="w-8 h-8" />}
-              />
+            {/* Input Mode Selector */}
+            <div className="flex gap-2 mb-4">
+              <Button
+                variant={inputMode === 'record' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setInputMode('record')}
+              >
+                <Mic className="w-4 h-4 mr-2" />
+                Record
+              </Button>
+              <Button
+                variant={inputMode === 'file' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setInputMode('file')}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Upload
+              </Button>
+              <Button
+                variant={inputMode === 'text' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setInputMode('text')}
+              >
+                Text
+              </Button>
             </div>
 
-            <div className="text-center text-slate-500">
-              <span>or</span>
-            </div>
+            {/* Live Recording */}
+            {inputMode === 'record' && (
+              <div>
+                <Label className="text-sm font-medium mb-2 block">
+                  Live Audio Recording
+                </Label>
+                <AudioRecorder
+                  onRecordingComplete={handleRecordingComplete}
+                  onRecordingClear={handleRecordingClear}
+                />
+              </div>
+            )}
 
-            <div>
-              <Label htmlFor="transcript" className="text-sm font-medium">
-                Meeting Transcript
-              </Label>
-              <Textarea
-                id="transcript"
-                placeholder="Paste your meeting transcript here... Example: 'Alex: Good morning everyone, let's start with the Q4 roadmap discussion. Sarah: I've prepared the new dashboard mockups...'"
-                value={transcript}
-                onChange={(e) => setTranscript(e.target.value)}
-                className="mt-2 min-h-[200px] resize-none"
-                disabled={!!selectedFile}
-              />
-              {selectedFile && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Audio file selected. Remove file to use text input.
-                </p>
-              )}
-            </div>
+            {/* File Upload */}
+            {inputMode === 'file' && (
+              <div>
+                <Label className="text-sm font-medium mb-2 block">
+                  Audio Upload (MP3, WAV, M4A)
+                </Label>
+                <FileUpload
+                  onFileSelect={handleFileSelect}
+                  onFileRemove={handleFileRemove}
+                  selectedFile={selectedFile}
+                  acceptedTypes={['.mp3', '.wav', '.m4a', '.mp4']}
+                  placeholder="Drag and drop your audio file here"
+                  icon={<Mic className="w-8 h-8" />}
+                />
+              </div>
+            )}
+
+            {/* Text Input */}
+            {inputMode === 'text' && (
+              <div>
+                <Label htmlFor="transcript" className="text-sm font-medium">
+                  Meeting Transcript
+                </Label>
+                <Textarea
+                  id="transcript"
+                  placeholder="Paste your meeting transcript here... Example: 'Alex: Good morning everyone, let's start with the Q4 roadmap discussion. Sarah: I've prepared the new dashboard mockups...'"
+                  value={transcript}
+                  onChange={(e) => setTranscript(e.target.value)}
+                  className="mt-2 min-h-[200px] resize-none"
+                />
+              </div>
+            )}
 
             <Button 
               onClick={handleAnalyze}
