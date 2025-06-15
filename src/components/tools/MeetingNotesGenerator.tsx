@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/ui/file-upload";
 import { AudioRecorder } from "@/components/ui/audio-recorder";
-import { Mic, Upload } from "lucide-react";
+import { Mic, Upload, Smile, Frown, Meh, Gauge, ClipboardCopy } from "lucide-react";
 
 export const MeetingNotesGenerator = () => {
   const [transcript, setTranscript] = useState("");
@@ -65,13 +64,23 @@ export const MeetingNotesGenerator = () => {
           "Agreed to extend the deadline by two weeks to ensure quality"
         ],
         actionItems: [
-          { task: "Update dashboard mockups based on feedback", assignee: "Sarah (Design Team)", deadline: "Friday, Dec 20" },
-          { task: "Conduct mobile performance audit", assignee: "Mike (Engineering)", deadline: "Monday, Dec 23" },
-          { task: "Schedule follow-up review meeting", assignee: "Alex (PM)", deadline: "This week" }
+          { task: "Update dashboard mockups based on feedback", assignee: "Sarah (Design Team)", deadline: "Friday, Dec 20", status: "In Progress" },
+          { task: "Conduct mobile performance audit", assignee: "Mike (Engineering)", deadline: "Monday, Dec 23", status: "To Do" },
+          { task: "Schedule follow-up review meeting", assignee: "Alex (PM)", deadline: "This week", status: "To Do" }
         ],
-        speakers: ["Alex (Product Manager)", "Sarah (Senior Designer)", "Mike (Lead Engineer)", "Lisa (QA Lead)"],
         duration: "45 minutes",
-        participants: 4
+        participants: 4,
+        effectivenessScore: 82,
+        sentimentAnalysis: [
+          { speaker: "Alex (Product Manager)", sentiment: "Neutral" },
+          { speaker: "Sarah (Senior Designer)", sentiment: "Positive" },
+          { speaker: "Mike (Lead Engineer)", sentiment: "Concerned" },
+          { speaker: "Lisa (QA Lead)", sentiment: "Neutral" }
+        ],
+        followUpEmail: {
+            subject: "Follow-up: Q4 Product Roadmap Discussion",
+            body: "Hi Team,\n\nThank you for the productive discussion on the Q4 product roadmap. Here's a quick summary:\n\nKey Decisions:\n- The new dashboard UI mockups are approved with minor revisions.\n- We will prioritize mobile optimization over new desktop features for this quarter.\n- The final deadline has been extended by two weeks.\n\nAction Items:\n- Sarah: Update dashboard mockups based on feedback (Due: Friday, Dec 20)\n- Mike: Conduct mobile performance audit (Due: Monday, Dec 23)\n- Alex: Schedule follow-up review meeting (Due: This week)\n\nPlease review and let me know if I missed anything.\n\nBest regards,\nAlex"
+        }
       });
       setIsLoading(false);
       toast({
@@ -79,6 +88,47 @@ export const MeetingNotesGenerator = () => {
         description: "Meeting notes have been generated successfully!",
       });
     }, 2000);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast({
+        title: "Copied to clipboard!",
+        description: "The email content has been copied.",
+      });
+    }).catch(err => {
+      toast({
+        title: "Error",
+        description: "Could not copy text to clipboard.",
+        variant: "destructive"
+      });
+      console.error('Failed to copy: ', err);
+    });
+  };
+
+  const getSentimentIcon = (sentiment: string) => {
+    switch (sentiment.toLowerCase()) {
+      case 'positive':
+        return <Smile className="w-5 h-5 text-green-500 flex-shrink-0" />;
+      case 'concerned':
+      case 'negative':
+        return <Frown className="w-5 h-5 text-red-500 flex-shrink-0" />;
+      default:
+        return <Meh className="w-5 h-5 text-yellow-500 flex-shrink-0" />;
+    }
+  };
+  
+  const getStatusBadge = (status: string) => {
+    switch(status) {
+      case "To Do":
+        return <Badge variant="secondary">{status}</Badge>;
+      case "In Progress":
+        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80">{status}</Badge>;
+      case "Done":
+        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100/80">{status}</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   return (
@@ -202,9 +252,13 @@ export const MeetingNotesGenerator = () => {
             ) : (
               <div className="space-y-6">
                 {/* Meeting Overview */}
-                <div className="flex gap-4 mb-6">
+                <div className="flex flex-wrap gap-2 md:gap-4 mb-4">
                   <Badge variant="outline">Duration: {results.duration}</Badge>
                   <Badge variant="outline">{results.participants} Participants</Badge>
+                  <Badge variant="outline" className="flex items-center gap-1.5">
+                    <Gauge className="w-3.5 h-3.5" />
+                    Score: {results.effectivenessScore}/100
+                  </Badge>
                 </div>
 
                 {/* Summary */}
@@ -224,7 +278,7 @@ export const MeetingNotesGenerator = () => {
                   </h3>
                   <div className="space-y-2">
                     {results.keyDecisions.map((decision: string, index: number) => (
-                      <div key={index} className="flex items-start gap-2 text-slate-600">
+                      <div key={index} className="flex items-start gap-3 text-slate-600">
                         <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
                         <span>{decision}</span>
                       </div>
@@ -242,7 +296,10 @@ export const MeetingNotesGenerator = () => {
                   <div className="space-y-3">
                     {results.actionItems.map((item: any, index: number) => (
                       <div key={index} className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
-                        <p className="font-medium text-slate-800">{item.task}</p>
+                        <div className="flex justify-between items-start gap-2">
+                          <p className="font-medium text-slate-800 pr-2">{item.task}</p>
+                          {getStatusBadge(item.status)}
+                        </div>
                         <div className="flex gap-4 mt-2 text-sm text-slate-600">
                           <span>👤 {item.assignee}</span>
                           <span>📅 {item.deadline}</span>
@@ -254,14 +311,55 @@ export const MeetingNotesGenerator = () => {
 
                 <Separator />
 
-                {/* Speakers */}
+                {/* Sentiment Analysis */}
+                <div>
+                  <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                    😊 Sentiment Analysis
+                  </h3>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {results.sentimentAnalysis.map((sentiment: any, index: number) => (
+                      <div key={index} className="flex items-center gap-2 bg-slate-50 p-2 rounded-md">
+                        {getSentimentIcon(sentiment.sentiment)}
+                        <span className="text-sm text-slate-700 truncate" title={sentiment.speaker}>{sentiment.speaker}:</span>
+                        <span className="text-sm font-medium ml-auto">{sentiment.sentiment}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <Separator />
+
+                {/* Follow-up Email */}
+                <div>
+                  <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                    📧 Follow-up Email Draft
+                  </h3>
+                  <Card className="bg-slate-50/70 shadow-inner">
+                    <CardHeader className="p-3 border-b flex-row items-center justify-between">
+                       <p className="text-sm font-medium leading-none">Subject: {results.followUpEmail.subject}</p>
+                       <Button variant="ghost" size="sm" className="h-7" onClick={() => copyToClipboard(results.followUpEmail.body)}>
+                         <ClipboardCopy className="w-3.5 h-3.5 mr-1.5" />
+                         Copy
+                       </Button>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <pre className="text-sm text-slate-600 whitespace-pre-wrap font-sans">
+                        {results.followUpEmail.body}
+                      </pre>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Separator />
+                
+                {/* Participants */}
                 <div>
                   <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
                     👥 Participants
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {results.speakers.map((speaker: string, index: number) => (
-                      <Badge key={index} variant="secondary">{speaker}</Badge>
+                    {results.sentimentAnalysis.map((sa: any, index: number) => (
+                      <Badge key={index} variant="secondary">{sa.speaker}</Badge>
                     ))}
                   </div>
                 </div>
