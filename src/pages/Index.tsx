@@ -3,14 +3,17 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Settings } from "lucide-react";
 import { MeetingNotesGenerator } from "@/components/tools/MeetingNotesGenerator";
 import { EmailSummarizer } from "@/components/tools/EmailSummarizer";
 import { ContractAnalyzer } from "@/components/tools/ContractAnalyzer";
 import { CodeExplainer } from "@/components/tools/CodeExplainer";
 import { ToolNavigation } from "@/components/ToolNavigation";
+import { ApiConfiguration } from "@/components/ApiConfiguration";
 
 const Index = () => {
   const [activeTool, setActiveTool] = useState<string | null>(null);
+  const [showApiConfig, setShowApiConfig] = useState(false);
 
   const tools = [
     {
@@ -60,15 +63,58 @@ const Index = () => {
     );
   }
 
+  if (showApiConfig) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                onClick={() => setShowApiConfig(false)}
+                className="flex items-center gap-2 hover:bg-slate-100"
+              >
+                ← Back to Suite
+              </Button>
+              <div className="h-6 w-px bg-slate-300"></div>
+              <h1 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                API Configuration
+              </h1>
+            </div>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-8 max-w-2xl">
+          <ApiConfiguration />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-              Gemini AI Productivity Suite
-            </h1>
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1"></div>
+              <div className="flex-1">
+                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Gemini AI Productivity Suite
+                </h1>
+              </div>
+              <div className="flex-1 flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowApiConfig(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="w-4 h-4" />
+                  API Config
+                </Button>
+              </div>
+            </div>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
               Leverage the power of Gemini AI to enhance efficiency, streamline workflows, and automate repetitive tasks across various professional domains
             </p>
