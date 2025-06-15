@@ -5,7 +5,7 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Languages, Download, FileText, Image, Video, FileAudio, Text } from "lucide-react";
+import { Languages, Download, FileText, Image, Video, FileAudio, Text, BookOpenCheck } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const DocumentTranslator = () => {
@@ -377,11 +377,26 @@ Translation completed successfully.
                 </>
               )}
             </Button>
+          </CardContent>
+        </Card>
+      </div>
 
-            {translatedText && (
-              <div className="space-y-2">
+      {/* Translated Content Section */}
+      {translatedText && (
+        <Card className="animate-in fade-in-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpenCheck className="w-5 h-5 text-green-600" />
+              Translated Content
+            </CardTitle>
+            <CardDescription>
+              Your content has been successfully translated. You can review it below or download it.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+             <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Translated Content:</label>
+                  <label className="text-sm font-medium">Result:</label>
                   <Button
                     variant="outline"
                     size="sm"
@@ -397,10 +412,9 @@ Translation completed successfully.
                   className="min-h-[200px] resize-none bg-slate-50 dark:bg-slate-800"
                 />
               </div>
-            )}
           </CardContent>
         </Card>
-      </div>
+      )}
 
       {/* Features Section */}
       <Card>
