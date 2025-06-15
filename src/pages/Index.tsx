@@ -75,7 +75,7 @@ const Index = () => {
       <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center">
-            <div className="flex justify-between items-start mb-4 rounded-md">
+            <div className="flex justify-between items-start mb-4 rounded-none">
               <div className="flex-1"></div>
               <div className="flex-1">
                 <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
