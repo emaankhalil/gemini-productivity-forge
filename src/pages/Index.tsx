@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { MeetingNotesGenerator } from "@/components/tools/MeetingNotesGenerator"
 import { EmailSummarizer } from "@/components/tools/EmailSummarizer";
 import { ContractAnalyzer } from "@/components/tools/ContractAnalyzer";
 import { CodeExplainer } from "@/components/tools/CodeExplainer";
+import { DocumentTranslator } from "@/components/tools/DocumentTranslator";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ApiConfiguration } from "@/components/ApiConfiguration";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -44,6 +44,13 @@ const Index = () => {
     icon: "💻",
     features: ["Code Explanation", "Bug Detection", "Optimization Suggestions", "Test Case Generation"],
     component: CodeExplainer
+  }, {
+    id: "document-translator",
+    title: "Document Translator",
+    description: "Upload documents and translate them to multiple languages with AI-powered translation services",
+    icon: "🌐",
+    features: ["Multi-format Support", "12+ Languages", "Text Extraction", "Download Translations"],
+    component: DocumentTranslator
   }];
 
   const ActiveToolComponent = activeTool ? tools.find(t => t.id === activeTool)?.component : null;
