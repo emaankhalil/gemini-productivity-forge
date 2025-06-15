@@ -196,7 +196,7 @@ Sample document content would appear here...`;
       await new Promise(resolve => setTimeout(resolve, 3000));
       
       const selectedLang = languages.find(lang => lang.code === targetLanguage);
-      const fileCategory = getFileTypeCategory(selectedFile!);
+      const fileCategory = (inputMode === 'file' && selectedFile) ? getFileTypeCategory(selectedFile) : 'text';
       
       const mockTranslation = `[Translated to ${selectedLang?.name}]
 
@@ -210,7 +210,7 @@ This is a simulated translation of your ${fileCategory} content. In a real imple
 
 The translated content would maintain the original structure and context while providing accurate translation in the target language.
 
-File: ${selectedFile?.name}
+${selectedFile ? `File: ${selectedFile.name}` : `Source: Pasted Text`}
 Type: ${fileCategory.charAt(0).toUpperCase() + fileCategory.slice(1)}
 Target Language: ${selectedLang?.name}
 Original Length: ${extractedText.length} characters
@@ -224,6 +224,7 @@ Translation completed successfully.
         description: `${fileCategory.charAt(0).toUpperCase() + fileCategory.slice(1)} content translated to ${selectedLang?.name} successfully.`,
       });
     } catch (error) {
+      console.error("Translation failed:", error);
       toast({
         title: "Translation Failed",
         description: "Failed to translate the content. Please try again.",
@@ -236,12 +237,16 @@ Translation completed successfully.
 
   const downloadTranslation = () => {
     if (!translatedText) return;
+
+    const baseName = (inputMode === 'file' && selectedFile) 
+      ? selectedFile.name.replace(/\.[^/.]+$/, "") 
+      : 'pasted_text';
     
     const blob = new Blob([translatedText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `translated_${selectedFile?.name?.replace(/\.[^/.]+$/, "")}_${targetLanguage}.txt`;
+    a.download = `translated_${baseName}_${targetLanguage}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
