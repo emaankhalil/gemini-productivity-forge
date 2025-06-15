@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,14 +7,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileUpload } from "@/components/ui/file-upload";
 import { useToast } from "@/hooks/use-toast";
 
 export const CodeExplainer = () => {
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("javascript");
+  const [inputMode, setInputMode] = useState<"text" | "file">("text");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>(null);
   const { toast } = useToast();
+
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      setCode(content);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleFileRemove = () => {
+    setSelectedFile(null);
+    setCode("");
+  };
 
   const handleAnalyze = async () => {
     if (!code.trim()) {
@@ -110,10 +127,27 @@ export const CodeExplainer = () => {
               🔧 Code Input
             </CardTitle>
             <CardDescription>
-              Paste your code snippet below for analysis
+              Upload a code file or paste your code snippet below for analysis
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            <div className="flex gap-2">
+              <Button
+                variant={inputMode === "text" ? "default" : "outline"}
+                onClick={() => setInputMode("text")}
+                size="sm"
+              >
+                Text Input
+              </Button>
+              <Button
+                variant={inputMode === "file" ? "default" : "outline"}
+                onClick={() => setInputMode("file")}
+                size="sm"
+              >
+                File Upload
+              </Button>
+            </div>
+
             <div>
               <Label htmlFor="language" className="text-sm font-medium">
                 Programming Language
@@ -126,20 +160,38 @@ export const CodeExplainer = () => {
                   <SelectItem value="javascript">JavaScript</SelectItem>
                   <SelectItem value="python">Python</SelectItem>
                   <SelectItem value="java">Java</SelectItem>
+                  <SelectItem value="c">C</SelectItem>
                   <SelectItem value="cpp">C++</SelectItem>
+                  <SelectItem value="html">HTML</SelectItem>
                   <SelectItem value="go">Go</SelectItem>
                   <SelectItem value="rust">Rust</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="code-input" className="text-sm font-medium">
-                Code Snippet
-              </Label>
-              <Textarea
-                id="code-input"
-                placeholder={`// Example JavaScript code:
+            {inputMode === "file" ? (
+              <div>
+                <Label className="text-sm font-medium">Code File</Label>
+                <div className="mt-2">
+                  <FileUpload
+                    onFileSelect={handleFileSelect}
+                    onFileRemove={handleFileRemove}
+                    selectedFile={selectedFile}
+                    acceptedTypes={['.js', '.jsx', '.ts', '.tsx', '.py', '.java', '.c', '.cpp', '.h', '.hpp', '.html', '.htm', '.go', '.rs', '.txt']}
+                    maxSize={5 * 1024 * 1024} // 5MB
+                    placeholder="Drag and drop your code file here"
+                    icon={<span className="text-2xl">📄</span>}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <Label htmlFor="code-input" className="text-sm font-medium">
+                  Code Snippet
+                </Label>
+                <Textarea
+                  id="code-input"
+                  placeholder={`// Example JavaScript code:
 import React, { useState, useEffect } from 'react';
 
 const UserProfile = ({ userId }) => {
@@ -164,11 +216,12 @@ const UserProfile = ({ userId }) => {
     </div>
   );
 };`}
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="mt-2 min-h-[400px] resize-none font-mono text-sm"
-              />
-            </div>
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="mt-2 min-h-[400px] resize-none font-mono text-sm"
+                />
+              </div>
+            )}
 
             <Button 
               onClick={handleAnalyze}
