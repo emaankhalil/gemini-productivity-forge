@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,70 +9,53 @@ import { ContractAnalyzer } from "@/components/tools/ContractAnalyzer";
 import { CodeExplainer } from "@/components/tools/CodeExplainer";
 import { ToolNavigation } from "@/components/ToolNavigation";
 import { ApiConfiguration } from "@/components/ApiConfiguration";
-
 const Index = () => {
   const [activeTool, setActiveTool] = useState<string | null>(null);
   const [showApiConfig, setShowApiConfig] = useState(false);
-
-  const tools = [
-    {
-      id: "meeting-notes",
-      title: "AI Meeting Notes Generator",
-      description: "Transform audio recordings and transcripts into structured meeting notes with key decisions and action items",
-      icon: "🎤",
-      features: ["Audio/Transcript Upload", "Key Decisions Extraction", "Action Items & Ownership", "Speaker Identification"],
-      component: MeetingNotesGenerator
-    },
-    {
-      id: "email-summarizer",
-      title: "Email Summarizer & Smart Responder",
-      description: "Summarize lengthy email threads and generate intelligent, contextually relevant responses",
-      icon: "📧",
-      features: ["Email Thread Summarization", "Smart Response Generation", "Action Item Identification", "Calendar Event Suggestions"],
-      component: EmailSummarizer
-    },
-    {
-      id: "contract-analyzer",
-      title: "Contract Analyzer",
-      description: "Analyze legal contracts to identify risky clauses, extract key terms, and provide layman summaries",
-      icon: "📋",
-      features: ["Risk Clause Flagging", "Key Term Extraction", "Layman's Summary", "Compliance Checking"],
-      component: ContractAnalyzer
-    },
-    {
-      id: "code-explainer",
-      title: "Code Explainer & Debugger",
-      description: "Explain code snippets, identify bugs, suggest optimizations, and generate test cases",
-      icon: "💻",
-      features: ["Code Explanation", "Bug Detection", "Optimization Suggestions", "Test Case Generation"],
-      component: CodeExplainer
-    }
-  ];
-
+  const tools = [{
+    id: "meeting-notes",
+    title: "AI Meeting Notes Generator",
+    description: "Transform audio recordings and transcripts into structured meeting notes with key decisions and action items",
+    icon: "🎤",
+    features: ["Audio/Transcript Upload", "Key Decisions Extraction", "Action Items & Ownership", "Speaker Identification"],
+    component: MeetingNotesGenerator
+  }, {
+    id: "email-summarizer",
+    title: "Email Summarizer & Smart Responder",
+    description: "Summarize lengthy email threads and generate intelligent, contextually relevant responses",
+    icon: "📧",
+    features: ["Email Thread Summarization", "Smart Response Generation", "Action Item Identification", "Calendar Event Suggestions"],
+    component: EmailSummarizer
+  }, {
+    id: "contract-analyzer",
+    title: "Contract Analyzer",
+    description: "Analyze legal contracts to identify risky clauses, extract key terms, and provide layman summaries",
+    icon: "📋",
+    features: ["Risk Clause Flagging", "Key Term Extraction", "Layman's Summary", "Compliance Checking"],
+    component: ContractAnalyzer
+  }, {
+    id: "code-explainer",
+    title: "Code Explainer & Debugger",
+    description: "Explain code snippets, identify bugs, suggest optimizations, and generate test cases",
+    icon: "💻",
+    features: ["Code Explanation", "Bug Detection", "Optimization Suggestions", "Test Case Generation"],
+    component: CodeExplainer
+  }];
   const ActiveToolComponent = activeTool ? tools.find(t => t.id === activeTool)?.component : null;
-
   if (activeTool && ActiveToolComponent) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
         <ToolNavigation onBack={() => setActiveTool(null)} />
         <div className="container mx-auto px-4 py-8">
           <ActiveToolComponent />
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (showApiConfig) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => setShowApiConfig(false)}
-                className="flex items-center gap-2 hover:bg-slate-100"
-              >
+              <Button variant="ghost" onClick={() => setShowApiConfig(false)} className="flex items-center gap-2 hover:bg-slate-100">
                 ← Back to Suite
               </Button>
               <div className="h-6 w-px bg-slate-300"></div>
@@ -86,30 +68,21 @@ const Index = () => {
         <div className="container mx-auto px-4 py-8 max-w-2xl">
           <ApiConfiguration />
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center">
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-4 rounded-md">
               <div className="flex-1"></div>
               <div className="flex-1">
                 <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Gemini AI Productivity Suite
-                </h1>
+Productivity &amp; Automation Tools</h1>
               </div>
               <div className="flex-1 flex justify-end">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowApiConfig(true)}
-                  className="flex items-center gap-2"
-                >
+                <Button variant="outline" size="sm" onClick={() => setShowApiConfig(true)} className="flex items-center gap-2">
                   <Settings className="w-4 h-4" />
                   API Config
                 </Button>
@@ -128,12 +101,7 @@ const Index = () => {
       {/* Tools Grid */}
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-2 gap-8">
-          {tools.map((tool) => (
-            <Card 
-              key={tool.id} 
-              className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-0 bg-white/80 backdrop-blur-sm cursor-pointer"
-              onClick={() => setActiveTool(tool.id)}
-            >
+          {tools.map(tool => <Card key={tool.id} className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border-0 bg-white/80 backdrop-blur-sm cursor-pointer" onClick={() => setActiveTool(tool.id)}>
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="text-3xl">{tool.icon}</div>
@@ -149,22 +117,17 @@ const Index = () => {
                 <div className="space-y-3">
                   <h4 className="font-semibold text-slate-800 mb-2">Key Features:</h4>
                   <div className="grid grid-cols-1 gap-2">
-                    {tool.features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2 text-sm text-slate-600">
+                    {tool.features.map((feature, index) => <div key={index} className="flex items-center gap-2 text-sm text-slate-600">
                         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                         {feature}
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
-                  <Button 
-                    className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0"
-                  >
+                  <Button className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0">
                     Try {tool.title.split(' ')[1]} Tool →
                   </Button>
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
 
         {/* Benefits Section */}
@@ -189,8 +152,6 @@ const Index = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
