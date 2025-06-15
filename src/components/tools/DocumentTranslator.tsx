@@ -5,9 +5,11 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Languages, Download, FileText, Image, Video, FileAudio } from "lucide-react";
+import { Languages, Download, FileText, Image, Video, FileAudio, Text } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const DocumentTranslator = () => {
+  const [inputMode, setInputMode] = useState<'file' | 'text'>('file');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [extractedText, setExtractedText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
@@ -50,6 +52,7 @@ export const DocumentTranslator = () => {
   };
 
   const handleFileSelect = async (file: File) => {
+    setInputMode('file');
     setSelectedFile(file);
     setExtractedText("");
     setTranslatedText("");
@@ -169,6 +172,15 @@ Sample document content would appear here...`;
     setTranslatedText("");
   };
 
+  const handleInputModeChange = (mode: string) => {
+    if (mode === 'file' || mode === 'text') {
+      setInputMode(mode as 'file' | 'text');
+      setExtractedText("");
+      setSelectedFile(null);
+      setTranslatedText("");
+    }
+  };
+
   const handleTranslate = async () => {
     if (!extractedText || !targetLanguage) {
       toast({
@@ -256,47 +268,62 @@ Translation completed successfully.
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Upload and Extract Section */}
+        {/* Input Section */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {selectedFile ? getFileTypeIcon(selectedFile) : <FileText className="w-5 h-5" />}
-              File Upload & Content Extraction
+              <FileText className="w-5 h-5" />
+              Source Content
             </CardTitle>
             <CardDescription>
-              Upload your file and extract text content or transcripts for translation
+              Upload a file or paste text to be translated.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <FileUpload
-              onFileSelect={handleFileSelect}
-              onFileRemove={handleFileRemove}
-              selectedFile={selectedFile}
-              acceptedTypes={['.pdf', '.docx', '.doc', '.txt', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.mp3', '.wav', '.aac', '.flac', '.ogg', '.m4a']}
-              placeholder="Upload document, image, video, or audio file"
-              icon={<FileText className="w-8 h-8" />}
-            />
-            
-            {isExtracting && (
-              <div className="text-center py-4">
-                <div className="animate-spin inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full"></div>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                  Extracting content from {selectedFile ? getFileTypeCategory(selectedFile) : 'file'}...
-                </p>
-              </div>
-            )}
-
-            {extractedText && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Extracted Content:</label>
+            <Tabs value={inputMode} onValueChange={handleInputModeChange} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="file">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Upload File
+                </TabsTrigger>
+                <TabsTrigger value="text">
+                  <Text className="w-4 h-4 mr-2" />
+                  Paste Text
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="file" className="mt-4">
+                <FileUpload
+                  onFileSelect={handleFileSelect}
+                  onFileRemove={handleFileRemove}
+                  selectedFile={selectedFile}
+                  acceptedTypes={['.pdf', '.docx', '.doc', '.txt', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.mp3', '.wav', '.aac', '.flac', '.ogg', '.m4a']}
+                  placeholder="Upload document, image, video, or audio file"
+                  icon={selectedFile ? getFileTypeIcon(selectedFile) : <FileText className="w-8 h-8" />}
+                />
+                
+                {isExtracting && (
+                  <div className="text-center py-4">
+                    <div className="animate-spin inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                      Extracting content from {selectedFile ? getFileTypeCategory(selectedFile) : 'file'}...
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="text" className="mt-4">
                 <Textarea
                   value={extractedText}
                   onChange={(e) => setExtractedText(e.target.value)}
-                  placeholder="Extracted content will appear here..."
+                  placeholder={
+                    inputMode === 'file'
+                      ? "Content extracted from your file will appear here. You can edit it before translating."
+                      : "Paste your text here..."
+                  }
                   className="min-h-[200px] resize-none"
+                  disabled={inputMode === 'file' && isExtracting}
                 />
-              </div>
-            )}
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
