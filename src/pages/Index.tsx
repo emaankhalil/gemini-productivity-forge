@@ -79,28 +79,25 @@ const Index = () => {
   return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 md:py-6">
-          <div className="text-center">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-3 md:mb-4">
-              <div className="flex-1 hidden sm:block"></div>
-              <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
-                  Productivity & Automation Tools
-                </h1>
-              </div>
-              <div className="flex-1 flex justify-center sm:justify-end">
-                <Button variant="outline" size="sm" onClick={() => setShowApiConfig(true)} className="flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
-                  <span className="hidden sm:inline">API Config</span>
-                </Button>
-              </div>
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate">
+                Productivity & Automation Tools
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-600 mt-1 line-clamp-1">
+                Leverage Gemini AI to enhance efficiency and automate tasks
+              </p>
             </div>
-            <p className="text-sm sm:text-base md:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed px-2">
-              Leverage the power of Gemini AI to enhance efficiency, streamline workflows, and automate repetitive tasks
-            </p>
-            <Badge variant="secondary" className="mt-2 md:mt-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs">
-              Powered by Gemini AI
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-gradient-to-r from-blue-500 to-purple-500 text-white text-xs hidden sm:inline-flex">
+                Powered by Gemini AI
+              </Badge>
+              <Button variant="outline" size="sm" onClick={() => setShowApiConfig(true)} className="flex items-center gap-1">
+                <Settings className="w-4 h-4" />
+                <span className="hidden sm:inline text-xs">API</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
